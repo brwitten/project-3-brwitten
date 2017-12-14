@@ -31,6 +31,12 @@ class UserController < ApplicationController
       @article_info << Article.find(article.article_id)
     end
     pdf = Prawn::Document.new
+    pdf.font_families.update("Roboto_Slab" => {
+      :normal => "app/assets/fonts/Roboto_Slab/RobotoSlab-Regular.ttf",
+      :bold => "app/assets/fonts/Roboto_Slab/RobotoSlab-Bold.ttf",
+      :italic => "app/assets/fonts/Roboto_Slab/RobotoSlab-Thin.ttf"
+    })
+    pdf.font "Roboto_Slab"
     pdf.draw_text "#{current_user.name}'s", :at => [10, 650], :size => 35
     pdf.draw_text "Two Nouns Magazine:", :at => [10, 600], :size => 35
     pdf.draw_text "#{@mag_title}", :at => [10, 550], :size => 35

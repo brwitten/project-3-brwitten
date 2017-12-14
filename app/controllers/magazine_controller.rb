@@ -1,4 +1,5 @@
-require 'httparty'
+require 'rubygems'
+require 'ruby-readability'
 require 'prawn'
 require 'open-uri'
 
@@ -19,33 +20,45 @@ class MagazineController < ApplicationController
     end
   end
 
+#using readability
   def parse_article
-    token = ENV["DIFFBOT_TOKEN"]
-    input_url = params[:search]
-    if input_url =~ /\A#{URI::regexp}\z/
-      url = URI::encode(input_url)
-      response = HTTParty.get "https://api.diffbot.com/v3/analyze?token=#{token}&url=#{url}"
-      @response = response
-      # response length is a hacky way to know if there was an error in processing the URL
-      if response.length <= 2
-        flash[:notice] = 'This is embarassing. That link cannot be processed. Please try a different one.'
-        redirect_to('/article_list')
-      else
-        @title = response["objects"][0]["title"] || "No title"
-        @author = response["objects"][0]["author"]
-        @source = response["objects"][0]["siteName"]
-        @url = response["request"]["pageUrl"]
-        @date = response["objects"][0]["date"]
-        @text = response["objects"][0]["text"]
-        new_article = Article.create_with(url:@url, title:@title, author:@author, published:@date, text:@text).find_or_create_by(title:@title)
-        current_user.articles << new_article
-        redirect_to('/article_list')
-      end
-    else
-      flash[:notice] = 'This is embarassing. That link cannot be processed. Please try a different one.'
-      redirect_to('/article_list')
-    end
+    @input_url = params[:search]
+    source = open(@input_url).read
+    @response = Readability::Document.new(source, :tags => %w[div p img a]).content
+    puts @response
+    new_article = Article.create_with(url:@input_url, text:@response).find_or_create_by(text:@response)
+    current_user.articles << new_article
+    redirect_to('/article_list')
   end
+
+#diffbot code
+  # def parse_article
+  #   token = ENV["DIFFBOT_TOKEN"]
+  #   input_url = params[:search]
+  #   if input_url =~ /\A#{URI::regexp}\z/
+  #     url = URI::encode(input_url)
+  #     response = HTTParty.get "https://api.diffbot.com/v3/analyze?token=#{token}&url=#{url}"
+  #     @response = response
+  #     # response length is a hacky way to know if there was an error in processing the URL
+  #     if response.length <= 2
+  #       flash[:notice] = 'This is embarassing. That link cannot be processed. Please try a different one.'
+  #       redirect_to('/article_list')
+  #     else
+  #       @title = response["objects"][0]["title"] || "No title"
+  #       @author = response["objects"][0]["author"]
+  #       @source = response["objects"][0]["siteName"]
+  #       @url = response["request"]["pageUrl"]
+  #       @date = response["objects"][0]["date"]
+  #       @text = response["objects"][0]["text"]
+  #       new_article = Article.create_with(url:@url, title:@title, author:@author, published:@date, text:@text).find_or_create_by(title:@title)
+  #       current_user.articles << new_article
+  #       redirect_to('/article_list')
+  #     end
+  #   else
+  #     flash[:notice] = 'This is embarassing. That link cannot be processed. Please try a different one.'
+  #     redirect_to('/article_list')
+  #   end
+  # end
 
   def save_magazine
     ## need to save the articles specifically listed
