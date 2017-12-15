@@ -38,7 +38,9 @@
             <li>
                 <strong><a href=<%= article.url %> > <%= article.title %> </strong> </a>
                 <br>
-                Text: <%= article.text[0..100] %>...<br>
+                <% if article.text.length >= 150 %>
+                  <%= article.text[0..150] %>...<br>
+                <% end %>
                 <br>
                  <a>
                     <%= form_tag('/delete/' + article["id"].to_s, method: "delete", id: "delete_article") do %>

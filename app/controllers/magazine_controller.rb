@@ -24,41 +24,12 @@ class MagazineController < ApplicationController
   def parse_article
     @input_url = params[:search]
     source = open(@input_url).read
-    @text = Readability::Document.new(source, :tags => %w[div p], :remove_empty_nodes => true).content
-    @title = Readability::Document.new(source, :tags => %w[div p], :remove_empty_nodes => true).title
+    @text = Readability::Document.new(source, :tags => %w[div p img a], :attributes => %w[src href], :remove_empty_nodes => true).content
+    @title = Readability::Document.new(source, :tags => %w[div p img a], :attributes => %w[src href], :remove_empty_nodes => true).title
     new_article = Article.create(url:@input_url, title:@title, text:@text)
     current_user.articles << new_article
     redirect_to('/article_list')
   end
-
-#diffbot code
-  # def parse_article
-  #   token = ENV["DIFFBOT_TOKEN"]
-  #   input_url = params[:search]
-  #   if input_url =~ /\A#{URI::regexp}\z/
-  #     url = URI::encode(input_url)
-  #     response = HTTParty.get "https://api.diffbot.com/v3/analyze?token=#{token}&url=#{url}"
-  #     @response = response
-  #     # response length is a hacky way to know if there was an error in processing the URL
-  #     if response.length <= 2
-  #       flash[:notice] = 'This is embarassing. That link cannot be processed. Please try a different one.'
-  #       redirect_to('/article_list')
-  #     else
-  #       @title = response["objects"][0]["title"] || "No title"
-  #       @author = response["objects"][0]["author"]
-  #       @source = response["objects"][0]["siteName"]
-  #       @url = response["request"]["pageUrl"]
-  #       @date = response["objects"][0]["date"]
-  #       @text = response["objects"][0]["text"]
-  #       new_article = Article.create_with(url:@url, title:@title, author:@author, published:@date, text:@text).find_or_create_by(title:@title)
-  #       current_user.articles << new_article
-  #       redirect_to('/article_list')
-  #     end
-  #   else
-  #     flash[:notice] = 'This is embarassing. That link cannot be processed. Please try a different one.'
-  #     redirect_to('/article_list')
-  #   end
-  # end
 
   def save_magazine
     ## need to save the articles specifically listed
