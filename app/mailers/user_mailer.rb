@@ -5,7 +5,7 @@ class UserMailer < ApplicationMailer
   def welcome_email(current_user)
     @user = current_user
     # need to update URL once deployed
-    @url  = 'https://lit-ridge-92986.herokuapp.com/'
+    @url  = 'https://twonounsbeta.herokuapp.com/'
     mail(to: @user.email, subject: 'Welcome to Two Nouns')
   end
 
