@@ -26,7 +26,8 @@ class MagazineController < ApplicationController
     source = open(@input_url).read
     @text = Readability::Document.new(source, :tags => %w[div p img a], :attributes => %w[src href], :remove_empty_nodes => true).content
     @title = Readability::Document.new(source, :tags => %w[div p img a], :attributes => %w[src href], :remove_empty_nodes => true).title
-    new_article = Article.create(url:@input_url, title:@title, text:@text)
+    @clean_text_2 = @text.gsub("<[^>]*>", "")
+    new_article = Article.create(url:@input_url, title:@title, text:@clean_text_2)
     current_user.articles << new_article
     redirect_to('/article_list')
   end

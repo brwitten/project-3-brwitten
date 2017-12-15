@@ -32,14 +32,14 @@
 
     <% if @article_list.length > 0 %>
 
-      <div>
+      <div id="articles">
         <ul>
           <% @article_list.each do |article| %>
             <li>
                 <strong><a href=<%= article.url %> > <%= article.title %> </strong> </a>
                 <br>
                 <% if article.text.length >= 150 %>
-                  <%= article.text[0..150] %>...<br>
+                  <%= article.text[0..1050] %>...<br>
                 <% end %>
                 <br>
                  <a>
