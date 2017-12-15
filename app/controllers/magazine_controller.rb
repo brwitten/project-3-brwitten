@@ -24,9 +24,9 @@ class MagazineController < ApplicationController
   def parse_article
     @input_url = params[:search]
     source = open(@input_url).read
-    @response = Readability::Document.new(source, :tags => %w[div p img a]).content
-    puts @response
-    new_article = Article.create_with(url:@input_url, text:@response).find_or_create_by(text:@response)
+    @text = Readability::Document.new(source, :tags => %w[div p], :remove_empty_nodes => true).content
+    @title = Readability::Document.new(source, :tags => %w[div p], :remove_empty_nodes => true).title
+    new_article = Article.create(url:@input_url, title:@title, text:@text)
     current_user.articles << new_article
     redirect_to('/article_list')
   end
